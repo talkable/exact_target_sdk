@@ -141,6 +141,14 @@ class APIObject
     end
   end
 
+  def render_property_hash!(property_name, hash, xml)
+    xml.__send__(property_name) do
+      hash.each do |key, value|
+        render_property!(key, value, xml)
+      end
+    end
+  end
+
   def render_property!(property_name, property_value, xml, options = {})
     if property_value.is_a?(APIObject)
       xml.__send__(property_name, { "xsi:type" => property_value.type_name } ) do
@@ -154,6 +162,8 @@ class APIObject
       else
         render_property_array!(property_name, property_value, xml)
       end
+    elsif property_value.is_a?(Hash)
+      render_property_hash!(property_name, property_value, xml)
     else
       xml.__send__(property_name, property_value.to_s)
     end
