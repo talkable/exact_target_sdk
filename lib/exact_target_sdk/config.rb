@@ -39,6 +39,7 @@ module ExactTargetSDK
       :read_timeout => DEFAULT_TIMEOUT,
       :endpoint => DEFAULT_ENDPOINT,
       :namespace => DEFAULT_NAMESPACE,
+      :client_mid => nil,
     }
     
     @config.merge!(options) if options

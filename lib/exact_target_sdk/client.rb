@@ -46,6 +46,12 @@ class Client
 
     response = execute_request 'Create' do |xml|
       xml.CreateRequest do
+        if config[:client_mid]
+          xml.Client do
+            xml.ID config[:client_mid]
+          end
+        end
+
         xml.Options  # TODO: support CreateOptions
 
         api_objects.each do |api_object|
@@ -80,6 +86,12 @@ class Client
     response = execute_request 'Retrieve' do |xml|
       xml.RetrieveRequestMsg do
         xml.RetrieveRequest do
+          if config[:client_mid]
+            xml.Client do
+              xml.ID config[:client_mid]
+            end
+          end
+
           xml.Options
 
           xml.ObjectType object_type_name
@@ -117,6 +129,12 @@ class Client
 
     response = execute_request 'Update' do |xml|
       xml.UpdateRequest do
+        if config[:client_mid]
+          xml.Client do
+            xml.ID config[:client_mid]
+          end
+        end
+
         xml.Options  # TODO: support UpdateOptions
 
         api_objects.each do |api_object|
@@ -149,6 +167,12 @@ class Client
 
     response = execute_request 'Delete' do |xml|
       xml.DeleteRequest do
+        if config[:client_mid]
+          xml.Client do
+            xml.ID config[:client_mid]
+          end
+        end
+
         xml.Options  # TODO: support DeleteOptions
 
         api_objects.each do |api_object|
