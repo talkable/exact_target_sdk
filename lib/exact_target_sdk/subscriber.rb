@@ -17,6 +17,7 @@ class Subscriber < APIObject
   property 'EmailAddress', :required => true
   property 'EmailTypePreference'
   array_property 'Attributes'
+  property 'Lists'
 
   before_validation :sync_subscriber_key_and_email_address
 
