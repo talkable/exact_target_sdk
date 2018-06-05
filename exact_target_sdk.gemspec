@@ -14,9 +14,8 @@ Gem::Specification.new do |s|
   s.email = %q{daws23@gmail.com}
   s.homepage = %q{https://github.com/daws/exact_target_sdk}
   s.require_paths = [ 'lib' ]
-  
+
   # documentation
-  s.has_rdoc = true
   s.extra_rdoc_files = %w( README.rdoc CHANGELOG.rdoc LICENSE.txt )
   s.rdoc_options = %w( --main README.rdoc )
 
