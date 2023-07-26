@@ -24,7 +24,7 @@ class Client
     self.config = {
     }.merge!(ExactTargetSDK.config).merge!(options)
 
-    initialize_client!
+    initialize_client! unless access_token_authorization?
   end
 
   # Invokes the Create method.
@@ -228,12 +228,14 @@ class Client
 
   private
 
+  attr_reader :access_token
+
   attr_accessor :config, :client
   
   # Constructs and saves the savon client using provided config.
   def initialize_client!
     self.client = ::Savon.client(
-      :endpoint => config[:endpoint],
+      :endpoint => soap_instance_url,
       :namespace => config[:namespace],
       :open_timeout => config[:open_timeout],
       :read_timeout => config[:read_timeout],
@@ -251,6 +253,8 @@ class Client
   #
   # Returns the raw savon response.
   def execute_request(method)
+    request_access_token if access_token_authorization?
+
     begin
       response = client.call(method) do |locals|
         xml = Builder::XmlMarkup.new
@@ -270,11 +274,16 @@ class Client
               xml.a :ReplyTo do
                 xml.a :Address, "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"
               end
-              xml.a :To, config[:endpoint], "s:mustUnderstand" => "1"
-              xml.o :Security, "s:mustUnderstand" => "1" do
-                xml.o :UsernameToken, "o:Id" => "test" do
-                  xml.o :Username, config[:username]
-                  xml.o :Password, config[:password]
+              xml.a :To, soap_instance_url, "s:mustUnderstand" => "1"
+
+              if access_token_authorization?
+                xml.fueloauth access_token
+              else
+                xml.o :Security, "s:mustUnderstand" => "1" do
+                  xml.o :UsernameToken, "o:Id" => "test" do
+                    xml.o :Username, config[:username]
+                    xml.o :Password, config[:password]
+                  end
                 end
               end
             end
@@ -307,6 +316,46 @@ class Client
     end
   end
 
+  # Whether or not to Authenticate with an Access Token instead of UsernameToken
+  # https://developer.salesforce.com/docs/marketing/marketing-cloud/guide/access-token-s2s.html
+  # https://developer.salesforce.com/docs/marketing/marketing-cloud/guide/authenticate-soap-api.html#authenticate-with-an-access-token
+  def access_token_authorization?
+    config[:endpoint].include?(".auth.marketingcloudapis.com")
+  end
+
+  def soap_instance_url
+    @soap_instance_url || config[:endpoint]
+  end
+
+  def request_access_token
+    url = URI(Furi.update(config[:endpoint], :path => "/v2/token"))
+    request = Net::HTTP::Post.new(url)
+    request.set_form_data(
+      "client_id" => config[:username],
+      "client_secret" => config[:password],
+      "grant_type" => "client_credentials",
+    )
+
+    response = Net::HTTP.start(
+      url.hostname,
+      :open_timeout => config[:open_timeout],
+      :read_timeout => config[:read_timeout],
+      :use_ssl => true,
+    ) do |http|
+      http.request(request)
+    end
+
+    unless response.is_a? Net::HTTPSuccess
+      raise ::ExactTargetSDK::UnknownError, "#{response.code} for #{url}: #{response.body}"
+    end
+
+    data = JSON.parse(response.body)
+
+    @soap_instance_url = Furi.update(data.fetch("soap_instance_url"), :path => "/Service.asmx")
+    initialize_client!
+
+    @access_token = data.fetch("access_token")
+  end
 end
 
 end
