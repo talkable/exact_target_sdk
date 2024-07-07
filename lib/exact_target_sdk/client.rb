@@ -328,6 +328,7 @@ class Client
   end
 
   def request_access_token
+    return if @access_token = Rails.cache.fetch(access_token_cache_key(config[:username]), nil)
     url = URI(Furi.update(config[:endpoint], :path => "/v2/token"))
     request = Net::HTTP::Post.new(url)
     request.set_form_data(
@@ -354,7 +355,13 @@ class Client
     @soap_instance_url = Furi.update(data.fetch("soap_instance_url"), :path => "/Service.asmx")
     initialize_client!
 
-    @access_token = data.fetch("access_token")
+    access_token = data.fetch("access_token")
+    Rails.cache.write(access_token_cache_key(config[:username]), access_token, expires_in: 20.minutes.from_now)
+    @access_token = access_token
+  end
+
+  def access_token_cache_key(username)
+    "client_#{username}_access_token"
   end
 end
 
