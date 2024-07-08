@@ -13,6 +13,7 @@ module ExactTargetSDK
 # the guide linked above.
 class Client
 
+  attr_reader :access_token
   # Constructs a client.
   #
   # Any of the options documented in ExactTargetSDK#config may be overridden
@@ -229,8 +230,6 @@ class Client
   end
 
   private
-
-  attr_reader :access_token
 
   attr_accessor :config, :client
   
