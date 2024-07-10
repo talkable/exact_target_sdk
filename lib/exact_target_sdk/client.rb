@@ -12,8 +12,8 @@ module ExactTargetSDK
 # as transparent as possible, so that the API may be used by referring only to
 # the guide linked above.
 class Client
-
   attr_reader :config
+
   # Constructs a client.
   #
   # Any of the options documented in ExactTargetSDK#config may be overridden
@@ -254,7 +254,7 @@ class Client
   #
   # Returns the raw savon response.
   def execute_request(method)
-    request_access_token if access_token_authorization? && config[:access_token].nil?
+    request_access_token if access_token_authorization?
 
     begin
       response = client.call(method) do |locals|
@@ -321,7 +321,7 @@ class Client
   # https://developer.salesforce.com/docs/marketing/marketing-cloud/guide/access-token-s2s.html
   # https://developer.salesforce.com/docs/marketing/marketing-cloud/guide/authenticate-soap-api.html#authenticate-with-an-access-token
   def access_token_authorization?
-    config[:endpoint].include?(".auth.marketingcloudapis.com") || !config[:access_token].nil?
+    config[:endpoint].include?(".auth.marketingcloudapis.com")
   end
 
   def soap_instance_url
@@ -329,7 +329,7 @@ class Client
   end
 
   def request_access_token
-    return if config[:access_token]
+    return @access_token = config[:access_token] if config[:access_token]
 
     url = URI(Furi.update(config[:endpoint], :path => "/v2/token"))
     request = Net::HTTP::Post.new(url)
