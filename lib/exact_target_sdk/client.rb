@@ -12,6 +12,7 @@ module ExactTargetSDK
 # as transparent as possible, so that the API may be used by referring only to
 # the guide linked above.
 class Client
+  attr_reader :config
 
   # Constructs a client.
   #
@@ -328,6 +329,8 @@ class Client
   end
 
   def request_access_token
+    return @access_token = config[:access_token] if config[:access_token]
+
     url = URI(Furi.update(config[:endpoint], :path => "/v2/token"))
     request = Net::HTTP::Post.new(url)
     request.set_form_data(
