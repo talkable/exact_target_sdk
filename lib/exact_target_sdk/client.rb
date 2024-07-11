@@ -230,8 +230,9 @@ class Client
   private
 
   attr_reader :access_token
+  attr_writer :config
 
-  attr_accessor :config, :client
+  attr_accessor :client
   
   # Constructs and saves the savon client using provided config.
   def initialize_client!
