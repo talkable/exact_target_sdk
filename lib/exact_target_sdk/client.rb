@@ -272,7 +272,7 @@ class Client
 
             xml.s :Header do
               xml.a :Action, method, "s:mustUnderstand" => "1"
-              xml.a :MessageID, "uuid:#{Guid.new.to_s}"
+              xml.a :MessageID, "uuid:#{Digest::UUID.uuid_v4}"
               xml.a :ReplyTo do
                 xml.a :Address, "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"
               end
