@@ -1,4 +1,3 @@
-require 'guid'
 require 'savon'
 require 'timeout'
 
@@ -233,7 +232,7 @@ class Client
   attr_writer :config
 
   attr_accessor :client
-  
+
   # Constructs and saves the savon client using provided config.
   def initialize_client!
     self.client = ::Savon.client(
